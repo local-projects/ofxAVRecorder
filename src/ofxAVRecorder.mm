@@ -355,7 +355,7 @@ int ofxAVRecorder::getActiveVideoDevice(){
     if([recorder.selectedVideoDevice.formats count]>i){
         videoFormatIndex = i;
         
-    }else{
+    }else if(recorder.selectedVideoDevice){
         ofLogError()<<"Missing video format"<<endl;
         return;
     }
@@ -371,8 +371,8 @@ int ofxAVRecorder::getActiveVideoFormat(){
 
 void ofxAVRecorder::setActiveVideoFramerate(int i){
     if([[[[recorder selectedVideoDevice] activeFormat] videoSupportedFrameRateRanges] count]>videoFpsIndex){
-    videoFpsIndex = i;
-    }else{
+        videoFpsIndex = i;
+    }else if([recorder selectedVideoDevice]){
         ofLogError()<<"Missing video framerate"<<endl;
         return;
     }
@@ -408,7 +408,7 @@ void ofxAVRecorder::setActiveAudioFormat(int i){
     if([recorder.selectedAudioDevice.formats count]>audioFormatIndex){
         audioFormatIndex = i;
 
-    }else{
+    }else if(recorder.selectedAudioDevice){
         ofLogError()<<"Missing audio format"<<endl;
         return;
     }
