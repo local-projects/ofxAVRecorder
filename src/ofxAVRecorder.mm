@@ -415,15 +415,15 @@ int ofxAVRecorder::getActiveAudioFormat(){
 
 
 void ofxAVRecorder::showPreview(){
-    if(previewView){
+   /* if(previewView){
         [previewView setHidden:NO];
-    }
+    }*/
 };
 
 void ofxAVRecorder::hidePreview(){
-    if(previewView){
+    /*if(previewView){
         [previewView setHidden:YES];
-    }
+    }*/
 };
 
 

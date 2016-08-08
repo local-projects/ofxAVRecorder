@@ -87,7 +87,7 @@ class ofxAVRecorder : public ofThread {
 
     void stopRecording();
     
-    NSView* previewView = 0;
+    //NSView* previewView = 0;
     void showPreview();
     void hidePreview();
     

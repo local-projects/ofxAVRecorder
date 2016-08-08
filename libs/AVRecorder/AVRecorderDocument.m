@@ -681,6 +681,8 @@
             if(error){
                 NSLog(@"%@",error.description);
             }
+            [output release];
+            output = 0;
         }else{
             
         
