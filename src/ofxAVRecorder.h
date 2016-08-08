@@ -79,7 +79,7 @@ class ofxAVRecorder : public ofThread {
     static ofEvent <AVRecorderEvent> RECORDING_BEGAN;
     static ofEvent <AVRecorderEvent> RECORDING_FINISHED;
     static ofEvent <AVRecorderEvent> RECORDING_ERROR;
-
+    static ofEvent <AVRecorderEvent> DEVICE_DISCONNECTED;
 
     AVRecorderDelegate * delegate;
 
@@ -127,10 +127,11 @@ class ofxAVRecorder : public ofThread {
     int getActiveAudioFormat();
     
     //vector<NSString *const> getAvailableCompressionPresets();
-    void startSession();
+    void startSession(string outputPath);
  
  private:
-    
+    id didStartRunningObserver = 0;
+    id deviceWasDisconnectedObserver = 0;
     AVRecorderDocument* recorder = 0;
     string outputPath = "capture.mov";
 
