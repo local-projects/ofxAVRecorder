@@ -226,6 +226,7 @@ void ofxAVRecorder::startRecording(string _outputPath, int _videoDeviceIndex, in
     }
     
     bRecording = true;
+    hasStarted = 0;
     
     delegate.outputPath = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
     startThread();
@@ -446,7 +447,7 @@ void ofxAVRecorder::threadedFunction() {
                 
                 ofLog() << "Beginning AVF recording";
                 bRecordInitialised = true;
-  
+                initFrame =0;
                 //AUDIO
                 if([recorder.audioDevices count]>audioDeviceIndex){
                     [recorder setSelectedAudioDevice: [recorder.audioDevices objectAtIndex:audioDeviceIndex]];
@@ -478,11 +479,18 @@ void ofxAVRecorder::threadedFunction() {
                     [recorder setFrameRateRange:[[[[recorder selectedVideoDevice] activeFormat] videoSupportedFrameRateRanges] objectAtIndex:videoFpsIndex]];
                 }
                 
-        
-                [recorder setOutputPath:[[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()]];
+                NSString *str = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
                 
+                [recorder setOutputPath:str];
+                [str release];
+                str = 0;
+               
+            } else if(![recorder isRecording] && initFrame>10 && !hasStarted) {
+                cout<<"+++++++++START++++++"<<endl;
                 [recorder setRecording:YES];
+                hasStarted = 1;
             }
+            initFrame++;
         } else {
             /*
             if(bRecordInitialised) {

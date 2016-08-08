@@ -100,6 +100,9 @@ class ofxAVRecorder : public ofThread {
         return bRecording;
     }
     
+    bool hasStarted=0;
+    int initFrame =0;
+    
     vector<AVCaptureDevice *> getAvailableVideoDevices();
     
     void setActiveVideoDevice(int i);
