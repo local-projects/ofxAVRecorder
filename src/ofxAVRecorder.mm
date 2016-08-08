@@ -339,8 +339,9 @@ void ofxAVRecorder::setActiveVideoDevice(int i){
         ofLogError()<<"Missing video device"<<endl;
         return;
     }
-    
-    [recorder setSelectedVideoDevice: [recorder.videoDevices objectAtIndex:videoDeviceIndex]];
+    if(bRecordInitialised) {
+        [recorder setSelectedVideoDevice: [recorder.videoDevices objectAtIndex:videoDeviceIndex]];
+    }
 }
 
 int ofxAVRecorder::getActiveVideoDevice(){
@@ -358,7 +359,9 @@ int ofxAVRecorder::getActiveVideoDevice(){
         ofLogError()<<"Missing video format"<<endl;
         return;
     }
-    [recorder setVideoDeviceFormat:[recorder.selectedVideoDevice.formats objectAtIndex:videoFormatIndex]];
+    if(bRecordInitialised) {
+        [recorder setVideoDeviceFormat:[recorder.selectedVideoDevice.formats objectAtIndex:videoFormatIndex]];
+    }
 }
     
 int ofxAVRecorder::getActiveVideoFormat(){
@@ -373,8 +376,9 @@ void ofxAVRecorder::setActiveVideoFramerate(int i){
         ofLogError()<<"Missing video framerate"<<endl;
         return;
     }
-    
-    [recorder setFrameRateRange:[[[[recorder selectedVideoDevice] activeFormat] videoSupportedFrameRateRanges] objectAtIndex:videoFpsIndex]];
+    if(bRecordInitialised) {
+        [recorder setFrameRateRange:[[[[recorder selectedVideoDevice] activeFormat] videoSupportedFrameRateRanges] objectAtIndex:videoFpsIndex]];
+    }
     
 }
 
@@ -390,7 +394,9 @@ void ofxAVRecorder::setActiveAudioDevice(int i){
         ofLogError()<<"Missing audio device"<<endl;
         return;
     }
-    [recorder setSelectedAudioDevice: [recorder.audioDevices objectAtIndex:audioDeviceIndex]];
+    if(bRecordInitialised) {
+        [recorder setSelectedAudioDevice: [recorder.audioDevices objectAtIndex:audioDeviceIndex]];
+    }
 }
 
 int ofxAVRecorder::getActiveAudioDevice(){
@@ -406,7 +412,9 @@ void ofxAVRecorder::setActiveAudioFormat(int i){
         ofLogError()<<"Missing audio format"<<endl;
         return;
     }
-    [recorder setAudioDeviceFormat:[recorder.selectedAudioDevice.formats objectAtIndex:audioFormatIndex]];
+    if(bRecordInitialised) {
+        [recorder setAudioDeviceFormat:[recorder.selectedAudioDevice.formats objectAtIndex:audioFormatIndex]];
+    }
 }
 
 int ofxAVRecorder::getActiveAudioFormat(){
