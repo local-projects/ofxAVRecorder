@@ -1,6 +1,5 @@
 # ofxAVRecorder
-Minimal AVFoundation video recorder
-
+MINIMAL AvFoundation VIDEO RECORDER 
 
 An adaptation of Apple's [AVRecorder](https://developer.apple.com/library/mac/samplecode/AVRecorder/Introduction/Intro.html)
 
@@ -15,3 +14,4 @@ Make sure GoPro dimensions and framerate are the same as in Black Magic Desktop 
 Created by Andreas Borg on 4/25/16
 
 Copyright (c) 2015-2016 Andreas Borg localprojects.com
+
