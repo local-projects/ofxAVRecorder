@@ -39,7 +39,7 @@ ofEvent <AVRecorderEvent> ofxAVRecorder::DEVICE_DISCONNECTED;
 
 @interface AVRecorderDelegate () <AVCaptureFileOutputDelegate, AVCaptureFileOutputRecordingDelegate>
 {
-
+    
 };
 
 @end
@@ -51,7 +51,7 @@ ofEvent <AVRecorderEvent> ofxAVRecorder::DEVICE_DISCONNECTED;
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didStartRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
 {
-	NSLog(@"AVRecorderDelegate Did start recording to %@", [fileURL description]);
+    NSLog(@"AVRecorderDelegate Did start recording to %@", [fileURL description]);
     
     AVRecorderEvent e;
     e.error = (string) [fileURL.description UTF8String];
@@ -60,37 +60,37 @@ ofEvent <AVRecorderEvent> ofxAVRecorder::DEVICE_DISCONNECTED;
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didPauseRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
 {
-	NSLog(@"AVRecorderDelegate Did pause recording to %@", [fileURL description]);
+    NSLog(@"AVRecorderDelegate Did pause recording to %@", [fileURL description]);
 }
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didResumeRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
 {
-	NSLog(@"AVRecorderDelegate Did resume recording to %@", [fileURL description]);
+    NSLog(@"AVRecorderDelegate Did resume recording to %@", [fileURL description]);
 }
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput willFinishRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections dueToError:(NSError *)error
 {
-	dispatch_async(dispatch_get_main_queue(), ^(void) {
-		//[self presentError:error];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        //[self presentError:error];
         AVRecorderEvent e;
         e.error = (string) [error.description UTF8String];
         ofNotifyEvent(ofxAVRecorder::RECORDING_ERROR,e);
-	});
+    });
 }
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)recordError
 {
-	if (recordError != nil && [[[recordError userInfo] objectForKey:AVErrorRecordingSuccessfullyFinishedKey] boolValue] == NO) {
-		[[NSFileManager defaultManager] removeItemAtURL:outputFileURL error:nil];
-		dispatch_async(dispatch_get_main_queue(), ^(void) {
-			//[self presentError:recordError];
+    if (recordError != nil && [[[recordError userInfo] objectForKey:AVErrorRecordingSuccessfullyFinishedKey] boolValue] == NO) {
+        [[NSFileManager defaultManager] removeItemAtURL:outputFileURL error:nil];
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            //[self presentError:recordError];
             AVRecorderEvent e;
             e.error = (string) [recordError.description UTF8String];
             ofNotifyEvent(ofxAVRecorder::RECORDING_ERROR,e);
             
-		});
-	} else {
-    
+        });
+    } else {
+        
         if(outputPath){
             NSURL *output = [[NSURL alloc] initFileURLWithPath:outputPath];
             NSError *error = nil;
@@ -122,9 +122,9 @@ ofEvent <AVRecorderEvent> ofxAVRecorder::DEVICE_DISCONNECTED;
 
 
 
-- (void)presentError:(NSError *)error modalForWindow:(NSWindow *)window delegate:(nullable id)delegate didPresentSelector:(nullable SEL)didPresentSelector contextInfo:(nullable void *)contextInfo{
+- (void)presentError:(NSError *)error modalForWindow:(NSWindow *)window delegate:( id)delegate didPresentSelector:( SEL)didPresentSelector contextInfo:( void *)contextInfo{
     NSLog(@"presentError 1: %@",contextInfo);
-
+    
 };
 
 
@@ -134,7 +134,7 @@ ofEvent <AVRecorderEvent> ofxAVRecorder::DEVICE_DISCONNECTED;
 
 
 - (NSError *)willPresentError:(NSError *)error{
- NSLog(@"willPresentError: %@",error.description);
+    NSLog(@"willPresentError: %@",error.description);
 };
 
 @end
@@ -144,9 +144,7 @@ ofEvent <AVRecorderEvent> ofxAVRecorder::DEVICE_DISCONNECTED;
 //------------------------------------------------------------------
 ofxAVRecorder::ofxAVRecorder(){
     outputPath = "capture.mov";
-    
     recorder = [[AVRecorderDocument alloc] init];
-    
     delegate = [[AVRecorderDelegate alloc] init];
     recorder.delegate = delegate;
 };
@@ -155,7 +153,7 @@ ofxAVRecorder::ofxAVRecorder(){
 //------------------------------------------------------------------
 ofxAVRecorder::~ofxAVRecorder(){
     stopThread();
-	//stopRecording();
+    
     if(recorder) {
         ofLog() << "Releasing recorder";
         [[recorder session] stopRunning];
@@ -170,73 +168,55 @@ ofxAVRecorder::~ofxAVRecorder(){
             [[NSNotificationCenter defaultCenter] removeObserver:deviceWasDisconnectedObserver];
             deviceWasDisconnectedObserver=0;
         }
+        
         //Not ARC currently...todo?
         [recorder release];
-		recorder = 0;
+        recorder = 0;
         [delegate release];
         delegate = 0;
     }
-
+    
 };
 
 
 
 void ofxAVRecorder::startSession(string _outputPath){
-   /*
     
-      NSWindow * appWindow = (NSWindow *)ofGetCocoaWindow();
-    CGRect cg = CGRectMake(0, 0, ofGetWidth(), ofGetHeight());
-    previewView = [[NSView alloc] initWithFrame:NSRectFromCGRect(cg)];
-
-
-    AVCaptureVideoPreviewLayer * previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:[recorder session]];
-
-    previewLayer.frame = CGRectMake(0, 0, 1280, 720);
-    //[previewLayer setBackgroundColor:CGColorCreateGenericRGB(0.756f,0.756f,0.1f, 0.5f)];
-
-    [previewView setLayer:previewLayer];
-    [previewView setWantsLayer:YES];
-
-    [appWindow.contentView addSubview:previewView];
-*/
-
     outputPath = _outputPath;
-   // startRecording(outputPath);
+    // startRecording(outputPath);
     if(recorder){
         NSLog(@"ofxAVRecorder::startSession");
         [[recorder session] startRunning];
         
         didStartRunningObserver = [[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureSessionDidStartRunningNotification
-																	 object:[recorder session]
-																	  queue:[NSOperationQueue mainQueue]
-																 usingBlock:^(NSNotification *note) {
-																	 NSLog(@"Waited for session to start before recording called");
-                                                                     startRecording(outputPath);
-																 }];
+                                                                                    object:[recorder session]
+                                                                                     queue:[NSOperationQueue mainQueue]
+                                                                                usingBlock:^(NSNotification *note) {
+                                                                                    NSLog(@"Waited for session to start before recording called");
+                                                                                    //startRecording(outputPath);
+                                                                                }];
         
         
         deviceWasDisconnectedObserver = [[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureDeviceWasDisconnectedNotification
-																		   object:nil
-																			queue:[NSOperationQueue mainQueue]
-																	   usingBlock:^(NSNotification *note) {
-																		   
-                                                                            AVRecorderEvent e;
-                                                                            e.error = "divice_name";
-                                                                            ofNotifyEvent(ofxAVRecorder::DEVICE_DISCONNECTED,e);
-                                                                           
-                                                                           
-																	   }];
+                                                                                          object:nil
+                                                                                           queue:[NSOperationQueue mainQueue]
+                                                                                      usingBlock:^(NSNotification *note) {
+                                                                                          
+                                                                                          AVRecorderEvent e;
+                                                                                          e.error = "divice_name";
+                                                                                          ofNotifyEvent(ofxAVRecorder::DEVICE_DISCONNECTED,e);
+                                                                                          
+                                                                                          
+                                                                                      }];
         
     }else{
         NSLog(@"No recorder");
     }
 }
 
-
-//--------------------------------------------------------------
-void ofxAVRecorder::startRecording(string _outputPath, int _videoDeviceIndex, int _videoFormatIndex,int _videoFpsIndex, int _audioDeviceIndex, int _audioFormatIndex, int _compressionPresetIndex){
+void ofxAVRecorder::setSelectedDevices(int _videoDeviceIndex, int _videoFormatIndex,int _videoFpsIndex, int _audioDeviceIndex, int _audioFormatIndex, int _compressionPresetIndex){
     
-    outputPath = _outputPath;
+    ofLogNotice() << "setSelectedDevices()" << endl;
     
     if(_videoDeviceIndex>-1){
         videoDeviceIndex = _videoDeviceIndex;
@@ -261,13 +241,9 @@ void ofxAVRecorder::startRecording(string _outputPath, int _videoDeviceIndex, in
         compressionPresetIndex = _compressionPresetIndex;
     }
     
-    bRecording = true;
-    hasStarted = 0;
     
-    delegate.outputPath = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
-
-
-   //AUDIO
+    
+    //AUDIO
     if([recorder.audioDevices count]>audioDeviceIndex){
         [recorder setSelectedAudioDevice: [recorder.audioDevices objectAtIndex:audioDeviceIndex]];
     }else{
@@ -278,7 +254,7 @@ void ofxAVRecorder::startRecording(string _outputPath, int _videoDeviceIndex, in
         [recorder setAudioDeviceFormat:[recorder.selectedAudioDevice.formats objectAtIndex:audioFormatIndex]];
     }
     
-
+    
     
     //VIDEO
     if([recorder.videoDevices count]>videoDeviceIndex){
@@ -296,37 +272,35 @@ void ofxAVRecorder::startRecording(string _outputPath, int _videoDeviceIndex, in
         [recorder setFrameRateRange:[[[[recorder selectedVideoDevice] activeFormat] videoSupportedFrameRateRanges] objectAtIndex:videoFpsIndex]];
     }
     
-    NSString *str = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
-    
-    [recorder setOutputPath:str];
-    [str release];
-    str = 0;
-           
-
-    cout<<"+++++++++START++++++"<<endl;
-    [recorder setRecording:YES];
-
-        
-        
-            
-            
-    //startThread();
-}
-
-
-void ofxAVRecorder::stopRecording() {
-    
-    bRecording = false;
-    bRecordAudio = false;
-    [recorder setRecording:NO];
-    //stopThread();
-    
-     ofLog() << "Stopping AVF recording & thread"<<endl;
 }
 
 
 //--------------------------------------------------------------
+void ofxAVRecorder::startRecording(string _outputPath){
+    cout<<"+++++++++START++++++"<<endl;
+    bRecording = true;
+    hasStarted = false;
+    delegate.outputPath = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
+    
+    NSString *str = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
+    ofLogNotice() << "outputpath: " << str << endl;
+    [recorder setOutputPath:str];
+    [str release];
+    str = 0;
+    
+    [recorder setRecording:YES];
 
+}
+
+//--------------------------------------------------------------
+void ofxAVRecorder::stopRecording() {
+    bRecording = false;
+    bRecordAudio = false;
+    [recorder setRecording:NO];
+    ofLog() << "Stopping AVF recording & thread"<<endl;
+}
+
+//--------------------------------------------------------------
 vector<string> ofxAVRecorder::listVideoDevices() {
     [recorder refreshDevices];
     NSLog(@"______________Video devices______________");
@@ -402,17 +376,6 @@ vector<AVCaptureDeviceFormat*> ofxAVRecorder::getActiveAudioFormats(){
     return list;
 };
 
-/*
-vector<NSString *const> ofxAVRecorder::getAvailableCompressionPresets(){
-    vector<NSString *const>list;
-    for(int i=0;i<[recorder.availableSessionPresets count];i++){
-        list.push_back([recorder.availableSessionPresets objectAtIndex:i]);
-    }
-    return list;
-};
-*/
-
-
 void ofxAVRecorder::setActiveVideoDevice(int i){
     if([recorder.videoDevices count]>i){
         videoDeviceIndex = i;
@@ -430,10 +393,7 @@ int ofxAVRecorder::getActiveVideoDevice(){
     return videoDeviceIndex;
 }
 
-
-
-
- void ofxAVRecorder::setActiveVideoFormat(int i){
+void ofxAVRecorder::setActiveVideoFormat(int i){
     if([recorder.selectedVideoDevice.formats count]>i){
         videoFormatIndex = i;
         
@@ -445,7 +405,7 @@ int ofxAVRecorder::getActiveVideoDevice(){
         [recorder setVideoDeviceFormat:[recorder.selectedVideoDevice.formats objectAtIndex:videoFormatIndex]];
     }
 }
-    
+
 int ofxAVRecorder::getActiveVideoFormat(){
     return videoFormatIndex;
 }
@@ -489,7 +449,7 @@ int ofxAVRecorder::getActiveAudioDevice(){
 void ofxAVRecorder::setActiveAudioFormat(int i){
     if([recorder.selectedAudioDevice.formats count]>audioFormatIndex){
         audioFormatIndex = i;
-
+        
     }else if(recorder.selectedAudioDevice){
         ofLogError()<<"Missing audio format"<<endl;
         return;
@@ -505,15 +465,15 @@ int ofxAVRecorder::getActiveAudioFormat(){
 
 
 void ofxAVRecorder::showPreview(){
-   /* if(previewView){
-        [previewView setHidden:NO];
-    }*/
+    /* if(previewView){
+     [previewView setHidden:NO];
+     }*/
 };
 
 void ofxAVRecorder::hidePreview(){
     /*if(previewView){
-        [previewView setHidden:YES];
-    }*/
+     [previewView setHidden:YES];
+     }*/
 };
 
 
@@ -521,7 +481,7 @@ void ofxAVRecorder::hidePreview(){
 //--------------------------------------------------------------
 void ofxAVRecorder::threadedFunction() {
     while( isThreadRunning() ){
-    
+        
         if(bRecording) {
             
             if(!bRecordInitialised) {
@@ -539,10 +499,6 @@ void ofxAVRecorder::threadedFunction() {
                 if([recorder.selectedAudioDevice.formats count]>audioFormatIndex){
                     [recorder setAudioDeviceFormat:[recorder.selectedAudioDevice.formats objectAtIndex:audioFormatIndex]];
                 }
-                
-                
-                
-                
                 
                 //VIDEO
                 if([recorder.videoDevices count]>videoDeviceIndex){
@@ -565,7 +521,7 @@ void ofxAVRecorder::threadedFunction() {
                 [recorder setOutputPath:str];
                 [str release];
                 str = 0;
-               
+                
             } else if(![recorder isRecording] && initFrame>10 && !hasStarted) {
                 cout<<"+++++++++START++++++"<<endl;
                 [recorder setRecording:YES];
@@ -574,14 +530,14 @@ void ofxAVRecorder::threadedFunction() {
             initFrame++;
         } else {
             /*
-            if(bRecordInitialised) {
-                ofLog() << "Stopping AVF recording";
-                bRecordInitialised = false;
-                
-                [recorder setRecording:NO];
-                
-                stopThread();
-            }*/
+             if(bRecordInitialised) {
+             ofLog() << "Stopping AVF recording";
+             bRecordInitialised = false;
+             
+             [recorder setRecording:NO];
+             
+             stopThread();
+             }*/
             stopThread();
         }
     }

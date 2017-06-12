@@ -60,7 +60,7 @@
 
 @interface AVRecorderDelegate : NSObject
 {
-//@private
+    //@private
     //NSString *outputPath;
 };
 
@@ -70,21 +70,24 @@
 
 
 class ofxAVRecorder : public ofThread {
-	
-  public:
-	
-	ofxAVRecorder();
+    
+public:
+    
+    ofxAVRecorder();
     ~ofxAVRecorder();
-	
+    
     static ofEvent <AVRecorderEvent> RECORDING_BEGAN;
     static ofEvent <AVRecorderEvent> RECORDING_FINISHED;
     static ofEvent <AVRecorderEvent> RECORDING_ERROR;
     static ofEvent <AVRecorderEvent> DEVICE_DISCONNECTED;
-
+    
     AVRecorderDelegate * delegate;
-
-    void startRecording(string outputPath, int videoDeviceIndex = -1, int videoFormatIndex =-1,int videoFpsIndex = -1, int audioDeviceIndex = -1, int audioFormatIndex = -1, int compressionPresetIndex = -1);
-
+    
+    
+    void setSelectedDevices(int videoDeviceIndex = -1, int videoFormatIndex =-1,int videoFpsIndex = -1, int audioDeviceIndex = -1, int audioFormatIndex = -1, int compressionPresetIndex = -1);
+    
+    void startRecording(string _outputPath);
+    
     void stopRecording();
     
     //NSView* previewView = 0;
@@ -95,7 +98,7 @@ class ofxAVRecorder : public ofThread {
     vector<string> listAudioDevices();
     
     void threadedFunction();
-
+    
     bool isRecording() {
         return bRecording;
     }
@@ -128,13 +131,13 @@ class ofxAVRecorder : public ofThread {
     
     //vector<NSString *const> getAvailableCompressionPresets();
     void startSession(string outputPath);
- 
- private:
+    
+private:
     id didStartRunningObserver = 0;
     id deviceWasDisconnectedObserver = 0;
     AVRecorderDocument* recorder = 0;
     string outputPath = "capture.mov";
-
+    
     
     int videoDeviceIndex=0;
     int videoFormatIndex = 0;
@@ -148,7 +151,7 @@ class ofxAVRecorder : public ofThread {
     bool bRecording = false;
     bool bRecordInitialised = false;
     bool bRecordAudio = false;
-   
+    
     
 };
 
