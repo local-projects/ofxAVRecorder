@@ -430,8 +430,10 @@ int ofxAVRecorder::getActiveVideoFramerate(){
 
 
 void ofxAVRecorder::setActiveAudioDevice(int i){
+    
     if([recorder.audioDevices count]>audioDeviceIndex){
         audioDeviceIndex = i;
+         [recorder setSelectedAudioDevice: [recorder.audioDevices objectAtIndex:audioDeviceIndex]];
     }else{
         ofLogError()<<"Missing audio device"<<endl;
         return;
