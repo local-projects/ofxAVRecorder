@@ -144,9 +144,7 @@ ofEvent <AVRecorderEvent> ofxAVRecorder::DEVICE_DISCONNECTED;
 //------------------------------------------------------------------
 ofxAVRecorder::ofxAVRecorder(){
     outputPath = "capture.mov";
-    
     recorder = [[AVRecorderDocument alloc] init];
-    
     delegate = [[AVRecorderDelegate alloc] init];
     recorder.delegate = delegate;
 };
@@ -155,7 +153,7 @@ ofxAVRecorder::ofxAVRecorder(){
 //------------------------------------------------------------------
 ofxAVRecorder::~ofxAVRecorder(){
     stopThread();
-    //stopRecording();
+    
     if(recorder) {
         ofLog() << "Releasing recorder";
         [[recorder session] stopRunning];
@@ -170,6 +168,7 @@ ofxAVRecorder::~ofxAVRecorder(){
             [[NSNotificationCenter defaultCenter] removeObserver:deviceWasDisconnectedObserver];
             deviceWasDisconnectedObserver=0;
         }
+        
         //Not ARC currently...todo?
         [recorder release];
         recorder = 0;
@@ -180,26 +179,7 @@ ofxAVRecorder::~ofxAVRecorder(){
 };
 
 
-
 void ofxAVRecorder::startSession(string _outputPath){
-    
-    /*
-     
-     NSWindow * appWindow = (NSWindow *)ofGetCocoaWindow();
-     CGRect cg = CGRectMake(0, 0, ofGetWidth(), ofGetHeight());
-     previewView = [[NSView alloc] initWithFrame:NSRectFromCGRect(cg)];
-     
-     
-     AVCaptureVideoPreviewLayer * previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:[recorder session]];
-     
-     previewLayer.frame = CGRectMake(0, 0, 1280, 720);
-     //[previewLayer setBackgroundColor:CGColorCreateGenericRGB(0.756f,0.756f,0.1f, 0.5f)];
-     
-     [previewView setLayer:previewLayer];
-     [previewView setWantsLayer:YES];
-     
-     [appWindow.contentView addSubview:previewView];
-     */
     
     outputPath = _outputPath;
     // startRecording(outputPath);
@@ -233,8 +213,8 @@ void ofxAVRecorder::startSession(string _outputPath){
     }
 }
 
-void ofxAVRecorder::setSelectedDevices(string _outputPath, int _videoDeviceIndex, int _videoFormatIndex,int _videoFpsIndex, int _audioDeviceIndex, int _audioFormatIndex, int _compressionPresetIndex){
-    outputPath = _outputPath;
+
+void ofxAVRecorder::setSelectedDevices(int _videoDeviceIndex, int _videoFormatIndex,int _videoFpsIndex, int _audioDeviceIndex, int _audioFormatIndex, int _compressionPresetIndex){
     
     if(_videoDeviceIndex>-1){
         videoDeviceIndex = _videoDeviceIndex;
@@ -258,12 +238,7 @@ void ofxAVRecorder::setSelectedDevices(string _outputPath, int _videoDeviceIndex
     if(_compressionPresetIndex >-1){
         compressionPresetIndex = _compressionPresetIndex;
     }
-    
-    bRecording = true;
-    hasStarted = 0;
-    
-    delegate.outputPath = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
-    
+
     
     //AUDIO
     if([recorder.audioDevices count]>audioDeviceIndex){
@@ -294,39 +269,34 @@ void ofxAVRecorder::setSelectedDevices(string _outputPath, int _videoDeviceIndex
         [recorder setFrameRateRange:[[[[recorder selectedVideoDevice] activeFormat] videoSupportedFrameRateRanges] objectAtIndex:videoFpsIndex]];
     }
     
-    NSString *str = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
+}
+
+
+//--------------------------------------------------------------
+void ofxAVRecorder::startRecording(string _outputPath){
+    cout<<"+++++++++START++++++"<<endl;
+    bRecording = true;
+    hasStarted = false;
+    delegate.outputPath = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
     
+    NSString *str = [[NSString alloc] initWithUTF8String:ofToDataPath(outputPath,true).c_str()];
+    ofLogNotice() << "outputpath: " << str << endl;
     [recorder setOutputPath:str];
     [str release];
     str = 0;
     
+    [recorder setRecording:YES];
 }
-
 
 //--------------------------------------------------------------
-void ofxAVRecorder::startRecording(){
-    
-    cout<<"+++++++++START++++++"<<endl;
-    [recorder setRecording:YES];
-    
-    
-    //startThread();
-}
-
-
 void ofxAVRecorder::stopRecording() {
-    
     bRecording = false;
     bRecordAudio = false;
     [recorder setRecording:NO];
-    //stopThread();
-    
     ofLog() << "Stopping AVF recording & thread"<<endl;
 }
 
-
 //--------------------------------------------------------------
-
 vector<string> ofxAVRecorder::listVideoDevices() {
     [recorder refreshDevices];
     NSLog(@"______________Video devices______________");
@@ -402,17 +372,6 @@ vector<AVCaptureDeviceFormat*> ofxAVRecorder::getActiveAudioFormats(){
     return list;
 };
 
-/*
- vector<NSString *const> ofxAVRecorder::getAvailableCompressionPresets(){
- vector<NSString *const>list;
- for(int i=0;i<[recorder.availableSessionPresets count];i++){
- list.push_back([recorder.availableSessionPresets objectAtIndex:i]);
- }
- return list;
- };
- */
-
-
 void ofxAVRecorder::setActiveVideoDevice(int i){
     if([recorder.videoDevices count]>i){
         videoDeviceIndex = i;
@@ -429,9 +388,6 @@ void ofxAVRecorder::setActiveVideoDevice(int i){
 int ofxAVRecorder::getActiveVideoDevice(){
     return videoDeviceIndex;
 }
-
-
-
 
 void ofxAVRecorder::setActiveVideoFormat(int i){
     if([recorder.selectedVideoDevice.formats count]>i){
@@ -470,8 +426,10 @@ int ofxAVRecorder::getActiveVideoFramerate(){
 
 
 void ofxAVRecorder::setActiveAudioDevice(int i){
+    
     if([recorder.audioDevices count]>audioDeviceIndex){
         audioDeviceIndex = i;
+         [recorder setSelectedAudioDevice: [recorder.audioDevices objectAtIndex:audioDeviceIndex]];
     }else{
         ofLogError()<<"Missing audio device"<<endl;
         return;
@@ -539,10 +497,6 @@ void ofxAVRecorder::threadedFunction() {
                 if([recorder.selectedAudioDevice.formats count]>audioFormatIndex){
                     [recorder setAudioDeviceFormat:[recorder.selectedAudioDevice.formats objectAtIndex:audioFormatIndex]];
                 }
-                
-                
-                
-                
                 
                 //VIDEO
                 if([recorder.videoDevices count]>videoDeviceIndex){

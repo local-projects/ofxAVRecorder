@@ -83,10 +83,11 @@ public:
     
     AVRecorderDelegate * delegate;
     
+
+    void setSelectedDevices(int videoDeviceIndex = -1, int videoFormatIndex =-1,int videoFpsIndex = -1, int audioDeviceIndex = -1, int audioFormatIndex = -1, int compressionPresetIndex = -1);
     
-    void setSelectedDevices(string outputPath, int videoDeviceIndex = -1, int videoFormatIndex =-1,int videoFpsIndex = -1, int audioDeviceIndex = -1, int audioFormatIndex = -1, int compressionPresetIndex = -1);
-    
-    void startRecording();
+    void startRecording(string _outputPath);
+
     
     void stopRecording();
     
