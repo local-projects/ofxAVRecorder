@@ -58,7 +58,7 @@
 @class AVCaptureDevice;
 @class AVCaptureDeviceFormat;
 @class AVFrameRateRange;
-
+@class AVCaptureStillImageOutput;
 
 @interface AVRecorderDocument : NSDocument
 {
@@ -108,9 +108,12 @@
 @property (readonly) BOOL hasRecordingDevice;
 @property (assign,getter=isRecording) BOOL recording;
 @property (retain) NSString* outputPath;
-
-
 @property (retain) AVCaptureVideoPreviewLayer	*previewLayer;
+
+#pragma mark - Image
+@property AVCaptureStillImageOutput *stillImageOutput;
+- (void) captureNow: (NSString *) path;
+- (void) saveImage: (CIImage *)image targetPath:(NSString *)path;
 
 #pragma mark - Preview
 @property (assign) NSView *previewView;

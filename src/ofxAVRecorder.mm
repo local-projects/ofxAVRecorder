@@ -147,6 +147,9 @@ ofxAVRecorder::ofxAVRecorder(){
     recorder = [[AVRecorderDocument alloc] init];
     delegate = [[AVRecorderDelegate alloc] init];
     recorder.delegate = delegate;
+    
+    
+    //previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:[recorder session]];
 };
 
 
@@ -461,11 +464,15 @@ int ofxAVRecorder::getActiveAudioFormat(){
     return audioFormatIndex;
 }
 
+AVCaptureVideoPreviewLayer * ofxAVRecorder::getPreviewLayer(){
+    return recorder.previewLayer; 
+}
 
-void ofxAVRecorder::showPreview(){
-    /* if(previewView){
-     [previewView setHidden:NO];
-     }*/
+void ofxAVRecorder::showPreview(NSWindowController * _wc){
+     //if(previewView){
+     //[previewLayer setHidden:NO];
+    
+     [recorder windowControllerDidLoadNib:_wc];
 };
 
 void ofxAVRecorder::hidePreview(){
@@ -539,4 +546,11 @@ void ofxAVRecorder::threadedFunction() {
             stopThread();
         }
     }
+}
+
+#pragma mark -- IMAGE
+void ofxAVRecorder::captureImage(string targetPath){
+    NSString * newPath = [NSString stringWithCString:targetPath.c_str()
+                       encoding:[NSString defaultCStringEncoding]];
+    [recorder captureNow:newPath];
 }

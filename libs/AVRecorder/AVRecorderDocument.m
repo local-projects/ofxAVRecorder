@@ -136,7 +136,7 @@
 																	   }];
 		observers = [[NSArray alloc] initWithObjects:runtimeErrorObserver, didStartRunningObserver, didStopRunningObserver, deviceWasConnectedObserver, deviceWasDisconnectedObserver, nil];
 		
-		// Attach outputs to session
+		//-------- Attach outputs to session--------
 		movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
 		
 
@@ -146,9 +146,16 @@
             [movieFileOutput setDelegate:self];
         }
         
-        
 		[session addOutput:movieFileOutput];
-		
+        
+        //Add image output
+        self.stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
+        NSDictionary *outputSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
+        [self.stillImageOutput setOutputSettings:outputSettings];
+        
+        [session addOutput:self.stillImageOutput];
+		//---------End image output-------------
+        
 		audioPreviewOutput = [[AVCaptureAudioPreviewOutput alloc] init];
 		[audioPreviewOutput setVolume:0.f];
 		[session addOutput:audioPreviewOutput];
@@ -210,10 +217,11 @@
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
-
+    
     NSLog(@"windowControllerDidLoadNib");
 	[super windowControllerDidLoadNib:aController];
 	
+    /*
 	// Attach preview to session
 	CALayer *previewViewLayer = [[self previewView] layer];
 	[previewViewLayer setBackgroundColor:CGColorGetConstantColor(kCGColorBlack)];
@@ -223,7 +231,18 @@
 	[previewViewLayer addSublayer:newPreviewLayer];
 	[self setPreviewLayer:newPreviewLayer];
 	[newPreviewLayer release];
-	
+	*/
+    
+    // Attach preview to session
+    CALayer *previewViewLayer = [[self previewView] layer];
+    [previewViewLayer setBackgroundColor:CGColorGetConstantColor(kCGColorBlack)];
+    previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:[self session]];
+    [previewLayer setFrame:[previewViewLayer bounds]];
+    [previewLayer setAutoresizingMask:kCALayerWidthSizable | kCALayerHeightSizable];
+    [previewViewLayer addSublayer:previewLayer];
+    [self setPreviewLayer:previewLayer];
+    [previewLayer release];
+    
 	// Start the session
 	[[self session] startRunning];
 	
@@ -532,6 +551,51 @@
 	}
 	
 	return availableSessionPresets;
+}
+
+#pragma mark - Image
+-(void) captureNow: (NSString *) path {
+    AVCaptureConnection *videoConnection = nil;
+    for (AVCaptureConnection *connection in self.stillImageOutput.connections) {
+        for (AVCaptureInputPort *port in [connection inputPorts]) {
+            if ([[port mediaType] isEqual:AVMediaTypeVideo] ) {
+                videoConnection = connection;
+                break;
+            }
+        }
+        if (videoConnection) {
+            NSLog(@"Found vidioConnection");
+            break;
+        }
+    }
+    
+    NSLog(@"about to request a capture from: %@", self.stillImageOutput);
+    [self.stillImageOutput captureStillImageAsynchronouslyFromConnection:videoConnection completionHandler: ^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
+        
+        NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
+        CIImage *image = [[CIImage alloc] initWithData:imageData];
+        
+        [self saveImage:image targetPath:path];
+    }];
+}
+
+-(void) saveImage:(CIImage *)image targetPath:(NSString *)path {
+    //NSLog(@"saveImage");
+    NSBitmapImageRep* rep = [[NSBitmapImageRep alloc]
+                             initWithCIImage:image];
+    NSData* imageData = [rep representationUsingType:NSJPEGFileType
+                                        properties:nil];
+    
+    //NSString *targetPath = [[NSString alloc] init];
+    //targetPath = @"/Users/nicolemessier/Desktop/Selfie.jpg";
+    
+    NSError* error;
+    [imageData writeToFile:path atomically:NO error:&error];
+    
+    if(error != nil){
+        NSLog(@"AVRecorderDocument::saveImage error: %@", error);
+    }
+    
 }
 
 #pragma mark - Audio Preview

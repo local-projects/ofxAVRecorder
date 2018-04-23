@@ -45,6 +45,7 @@
 #include "AVRecorderEvent.h"
 
 
+
 @class AVRecorderDocument;
 @class AVCaptureVideoPreviewLayer;
 @class AVCaptureSession;
@@ -91,9 +92,14 @@ public:
     
     void stopRecording();
     
-    //NSView* previewView = 0;
-    void showPreview();
+    //NSView* previewView = [[NSView alloc] init];
+    //AVCaptureVideoPreviewLayer *previewLayer;
+    void showPreview(NSWindowController * _wc);
     void hidePreview();
+    AVCaptureVideoPreviewLayer *getPreviewLayer();
+    
+    //Take image
+    void captureImage( string targetPath);
     
     vector<string> listVideoDevices();
     vector<string> listAudioDevices();
